@@ -93,7 +93,7 @@ module VagrantPlugins
               next
             end
 
-            b2.use Clone 
+            b2.use Create
           end
           b.use Call, IsRunning do |env, b2|
             if !env[:result]
@@ -143,7 +143,7 @@ module VagrantPlugins
 
       # autoload
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
-      autoload :Clone, action_root.join("clone")
+      autoload :Create, action_root.join("create")
       autoload :Destroy, action_root.join("destroy")
       autoload :GetSshInfo, action_root.join("get_ssh_info")
       autoload :GetState, action_root.join("get_state")
