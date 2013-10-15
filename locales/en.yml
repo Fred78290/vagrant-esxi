@@ -22,3 +22,5 @@ en:
       VM not created.
     vm_not_running: |-
       VM not running.
+    rsync_directory: |-
+      Rsyncing directory: %{hostpath} => %{guestpath}

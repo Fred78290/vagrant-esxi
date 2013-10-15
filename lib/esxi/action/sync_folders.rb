@@ -32,7 +32,7 @@ module VagrantPlugins
             # avoid creating an additional directory with rsync
             hostpath = "#{hostpath}/" if hostpath !~ /\/$/
 
-            env[:ui].info(I18n.t("esxi.rsync_folder",
+            env[:ui].info(I18n.t("vagrant_esxi.rsync_directory",
                                 :hostpath => hostpath,
                                 :guestpath => guestpath))
             
