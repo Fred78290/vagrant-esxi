@@ -16,7 +16,7 @@ module VagrantPlugins
         errors << I18n.t("config.user") if user.nil?
         errors << I18n.t("config.password") if password.nil?
         errors << I18n.t("config.name") if name.nil?
-        errors << I18n.t("config.database") if database.nil?
+        errors << I18n.t("config.datastore") if datastore.nil?
 
         { "esxi Provider" => errors }
       end
