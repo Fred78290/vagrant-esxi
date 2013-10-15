@@ -25,8 +25,8 @@ module VagrantPlugins
           cmd = [
                  "mkdir -p /vmfs/volumes/#{config.datastore}/#{dst}",
                  "'find /vmfs/volumes/#{config.datastore}/#{src} -type f \\! -name \\*.iso -exec cp \\{\\} /vmfs/volumes/#{config.datastore}/#{dst}/ \\;'",
-                 "'cd /vmfs/volumes/#{config.datastore}/#{dst}",
-                 "find /vmfs/volumes/#{config.datastore}/#{src} -type f -name \\*.iso -exec ln -s \\{\\} \\;'",
+                 "'cd /vmfs/volumes/#{config.datastore}/#{dst}'",
+                 "'find /vmfs/volumes/#{config.datastore}/#{src} -type f -name \\*.iso -exec ln -s \\{\\} \\;'",
                  "mv /vmfs/volumes/#{config.datastore}/#{dst}/#{src}.vmx /vmfs/volumes/#{config.datastore}/#{dst}/#{src}.vmx.bak",
                  "grep -v -e '^uuid.location' -e '^uuid.bios' -e '^vc.uuid' /vmfs/volumes/#{config.datastore}/#{dst}/#{src}.vmx.bak '>' /vmfs/volumes/#{config.datastore}/#{dst}/#{src}.vmx",
                  "rm /vmfs/volumes/#{config.datastore}/#{dst}/#{src}.vmx.bak",
