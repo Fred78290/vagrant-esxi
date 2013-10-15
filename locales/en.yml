@@ -16,3 +16,9 @@ en:
       Creating VM...
     registering: |-
       Registering VM...
+    vm_already_created: |-
+      VM already created.
+    vm_not_created: |-
+      VM not created.
+    vm_not_running: |-
+      VM not running.

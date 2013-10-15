@@ -9,7 +9,7 @@ module VagrantPlugins
         end
 
         def call(env)
-          env[:ui].info I18n.t("esxi.vm_already_created")
+          env[:ui].info I18n.t("vagrant_esxi.vm_already_created")
           @app.call(env)
         end
       end
