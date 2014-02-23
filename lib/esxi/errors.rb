@@ -3,9 +3,20 @@ require "vagrant"
 module VagrantPlugins
   module ESXi
     module Errors
-      class ESXiError < Vagrant::Errors::VagrantError
-        error_namespace("esxi.errors")
+      class VagrantESXiError < Vagrant::Errors::VagrantError
+        error_namespace("vagrant_esxi.errors")
       end
+
+      class RsyncError < VagrantESXiError
+        error_key(:rsync_error)
+      end
+
+      class VmImageExistsError < VagrantESXiError
+        error_key(:vm_image_exists)
+      end
+
     end
   end
 end
+
+

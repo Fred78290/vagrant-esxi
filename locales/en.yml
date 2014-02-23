@@ -24,3 +24,14 @@ en:
       VM not running.
     rsync_directory: |-
       Rsyncing directory: %{hostpath} => %{guestpath}
+
+    errors:
+      vm_image_exists: |-
+        the vm image is already created. Please run 'vagrant destroy' first.
+      rsync_error: |-
+        There was an error when attemping to rsync a share folder.
+        Please inspect the error message below for more info.
+
+        Host path: %{hostpath}
+        Guest path: %{guestpath}
+        Error: %{stderr}

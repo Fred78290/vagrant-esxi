@@ -17,7 +17,7 @@ module VagrantPlugins
           dst = config.name
 
           env[:ui].info(I18n.t("vagrant_esxi.creating"))
-          raise Error::ESXiError, :message => "#{dst} exists!" if system("ssh #{config.user}@#{config.host} test -e /vmfs/volumes/#{config.datastore}/#{dst}")
+          raise Errors::VmImageExistsError, :message => "#{dst} exists!" if system("ssh #{config.user}@#{config.host} test -e /vmfs/volumes/#{config.datastore}/#{dst}")
 
           cmd = [
                  "mkdir -p /vmfs/volumes/#{config.datastore}/#{dst}",
