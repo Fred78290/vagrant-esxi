@@ -16,9 +16,6 @@ module VagrantPlugins
           src = env[:machine].config.vm.box
           dst = config.name
 
-          env[:ui].info(I18n.t("vagrant_esxi.copying"))
-          system("'/Applications/VMware Fusion.app/Contents/Library/VMware OVF Tool/ovftool' --diskMode=seSparse --name=#{src} --net:'nat=VM Network' --noSSLVerify --overwrite ~/.vagrant.d/boxes/#{src}/vmware_desktop/packer-vmware.vmx vi://#{config.user}:#{config.password}@#{config.host}") unless system("ssh #{config.user}@#{config.host} test -e /vmfs/volumes/#{config.datastore}/#{src}")
-
           env[:ui].info(I18n.t("vagrant_esxi.creating"))
           raise Error::ESXiError, :message => "#{dst} exists!" if system("ssh #{config.user}@#{config.host} test -e /vmfs/volumes/#{config.datastore}/#{dst}")
 

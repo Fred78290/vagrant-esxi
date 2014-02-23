@@ -26,7 +26,6 @@ This is a Vagrant plugin for VMware ESXi.
       esxi.host = "host"
       esxi.datastore = "datastore1"
       esxi.user = "root"
-      esxi.password = "Zkg1nJXM1sh19sw9uV6P"
     end
 
 ## Issues
