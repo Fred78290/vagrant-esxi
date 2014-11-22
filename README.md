@@ -1,3 +1,5 @@
+**This repository is not maintained any longer.**
+
 # Vagrant ESXi Provider
 
 This is a Vagrant plugin for VMware ESXi. Virtual vagrant machines are cloned 
