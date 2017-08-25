@@ -1,4 +1,10 @@
-**This repository is not maintained any longer.**
+**This repository will continue to be maintained.**
+
+# Expected new features (in progress)
+The goal is to add some features to the original project, allowing in first priority
+1. abality to specify the number of cpus and memory usage
+2. abality to add VMX properties (like VMWare Studio plugin)
+3. abality to add a second drive (like vSphere plugin)
 
 # Vagrant ESXi Provider
 
@@ -9,7 +15,7 @@ Just create a vagrant compatible virtual machine on the ESXi host
 (see below) and use it as template.
 
 **NOTE:** This is a work in progress, it's forked from
-[vagrant-esxi](https://github.com/pdericson/vagrant-esxi) and originally derived from
+[vagrant-esxi](https://github.com/swobspace) and originally derived from
 [vagrant-vsphere](https://github.com/nsidc/vagrant-vsphere) 
 and [vagrant-aws](https://github.com/mitchellh/vagrant-aws).
 
@@ -20,7 +26,7 @@ Otherwise your datacenter configuration may break.
 
 ## Plugin Installation
 
-    git clone https://github.com/swobspace/vagrant-esxi.git
+    git clone https://github.com/Fred78290/vagrant-esxi.git
     cd vagrant-esxi
     gem build vagrant-esxi.gemspec
     vagrant plugin install vagrant-esxi
@@ -70,9 +76,13 @@ configuration file must exist in your datastore under
         esxi.host = "host"
         esxi.datastore = "datastore1"
         esxi.user = "root"
+        esxi.add_hd = 1024
+        esxi.memory_mb = 8192
+        esxi.cpu_count = 4
+        esxi.vmx[""] = 
       end
     end
 
 ## Issues
 
-https://github.com/swobspace/vagrant-esxi/issues
+https://github.com/Fred78290/vagrant-esxi/issues

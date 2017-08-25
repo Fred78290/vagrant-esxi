@@ -4,7 +4,7 @@ require "open3"
 module VagrantPlugins
   module ESXi
     module Action
-      class Create
+      class Import
 
         def initialize(app, env)
           @app = app
@@ -12,6 +12,38 @@ module VagrantPlugins
 
         def call(env)
           config = env[:machine].provider_config
+
+          ovf_file = ""
+
+          # Find first OVF/OVA file
+          env[:machine].box.directory.each_child(false) do |child|
+            if child.extname = "ovf" || child.extname = "ova" || child.extname = "vmx"
+                ovf_file = child.to_s
+                break
+            end
+          end
+
+          puts ovf_file
+
+          env[:ui].info(I18n.t("vagrant_esxi.importing"))
+
+          ovf_cmd = [
+              "ovftool",
+              "--datastore=\\\"#{config.datastore}\\\""
+              "--name=\\\"#{config.name}\\\""
+              ovf_file,
+              "vi://#{config.user}:#{config.password}@#{config.host}"
+          ]
+
+          r = Vagrant::Util::Subprocess.execute(*ovf_cmd)
+          
+          if r.exit_code != 0
+            raise Errors::RsyncError,
+              :ovf_file => ovf_file,
+              :stderr => r.stderr
+          end            
+        
+          exit
 
           src = env[:machine].config.vm.box
           dst = config.name

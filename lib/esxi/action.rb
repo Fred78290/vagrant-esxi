@@ -36,7 +36,7 @@ module VagrantPlugins
               end
               
               b3.use Provision
-              b3.use SyncFolders 
+              b3.use SyncedFolders 
             end        
           end
         end
@@ -101,7 +101,7 @@ module VagrantPlugins
             end
           end
           b.use Provision          
-          b.use SyncFolders          
+          b.use SyncedFolders          
         end
       end
 
@@ -144,6 +144,7 @@ module VagrantPlugins
       # autoload
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
       autoload :Create, action_root.join("create")
+      autoload :Created, action_root.join("created")
       autoload :Destroy, action_root.join("destroy")
       autoload :GetSshInfo, action_root.join("get_ssh_info")
       autoload :GetState, action_root.join("get_state")
@@ -154,7 +155,7 @@ module VagrantPlugins
       autoload :MessageNotRunning, action_root.join("message_not_running")
       autoload :PowerOff, action_root.join("power_off")
       autoload :PowerOn, action_root.join("power_on")
-      autoload :SyncFolders, action_root.join("sync_folders")
+      #autoload :SyncedFolders, action_root.join("sync_folders")
     end
   end
 end
