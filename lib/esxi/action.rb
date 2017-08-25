@@ -86,6 +86,15 @@ module VagrantPlugins
 
       def self.action_up
         Vagrant::Action::Builder.new.tap do |b|
+          # Handle box_url downloading early so that if the Vagrantfile
+          # references any files in the box or something it all just
+          # works fine.
+          b.use Call, Created do |env, b2|
+            if !env[:result]
+              b2.use HandleBox
+            end
+          end
+          
           b.use ConfigValidate
           b.use Call, IsCreated do |env, b2|
             if env[:result]
@@ -93,7 +102,7 @@ module VagrantPlugins
               next
             end
 
-            b2.use Create
+            b2.use Import
           end
           b.use Call, IsRunning do |env, b2|
             if !env[:result]
@@ -143,7 +152,7 @@ module VagrantPlugins
 
       # autoload
       action_root = Pathname.new(File.expand_path("../action", __FILE__))
-      autoload :Create, action_root.join("create")
+      autoload :Import, action_root.join("import")
       autoload :Created, action_root.join("created")
       autoload :Destroy, action_root.join("destroy")
       autoload :GetSshInfo, action_root.join("get_ssh_info")
@@ -155,7 +164,6 @@ module VagrantPlugins
       autoload :MessageNotRunning, action_root.join("message_not_running")
       autoload :PowerOff, action_root.join("power_off")
       autoload :PowerOn, action_root.join("power_on")
-      #autoload :SyncedFolders, action_root.join("sync_folders")
     end
   end
 end

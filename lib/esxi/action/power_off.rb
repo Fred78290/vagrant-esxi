@@ -12,7 +12,7 @@ module VagrantPlugins
           config = env[:machine].provider_config
 
           env[:ui].info I18n.t("vagrant_esxi.powering_off")
-          system("ssh #{config.user}@#{config.host} vim-cmd vmsvc/power.off '[#{config.datastore}]\\ #{config.name}/#{env[:machine].config.vm.box}.vmx' > /dev/null")
+          system("ssh #{config.user}@#{config.host} vim-cmd vmsvc/power.off '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' > /dev/null")
 
           @app.call env
         end

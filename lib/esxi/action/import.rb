@@ -12,55 +12,41 @@ module VagrantPlugins
 
         def call(env)
           config = env[:machine].provider_config
-
           ovf_file = ""
+          dst = config.name
+          dst_dir = "/vmfs/volumes/#{config.datastore}/#{dst}"
+          dst_vmx = "#{dst_dir}/#{dst}.vmx"
+          dst_vmx_bak = "#{dst_dir}/#{dst}.vmx.bak"
+          
+          env[:ui].info(I18n.t("vagrant_esxi.importing"))
 
+          if system("ssh #{config.user}@#{config.host} test -e #{dst_dir}")
+            raise Errors::VmImageExistsError, :message => "#{dst} exists!"
+          end
+          
           # Find first OVF/OVA file
           env[:machine].box.directory.each_child(false) do |child|
-            if child.extname = "ovf" || child.extname = "ova" || child.extname = "vmx"
-                ovf_file = child.to_s
+            if child.extname === ".ovf" || child.extname === ".ova" || child.extname === ".vmx"
+                ovf_file = env[:machine].box.directory.join(child.to_s).to_s
                 break
             end
           end
 
-          puts ovf_file
-
-          env[:ui].info(I18n.t("vagrant_esxi.importing"))
-
-          ovf_cmd = [
-              "ovftool",
-              "--datastore=\\\"#{config.datastore}\\\""
-              "--name=\\\"#{config.name}\\\""
-              ovf_file,
-              "vi://#{config.user}:#{config.password}@#{config.host}"
-          ]
+          ovf_cmd = ["ovftool", "--datastore=#{config.datastore}", "--name=#{config.name}", "#{ovf_file}", "vi://#{config.user}:#{config.password}@#{config.host}"]
 
           r = Vagrant::Util::Subprocess.execute(*ovf_cmd)
           
           if r.exit_code != 0
-            raise Errors::RsyncError,
+            raise Errors::OvfError,
               :ovf_file => ovf_file,
               :stderr => r.stderr
           end            
         
-          exit
-
-          src = env[:machine].config.vm.box
-          dst = config.name
-
-          src_dir = "/vmfs/volumes/#{config.datastore}/#{src}"
-          dst_dir = "/vmfs/volumes/#{config.datastore}/#{dst}"
-          dst_vmx = "#{dst_dir}/#{src}.vmx"
-          
           echo = [
-            "displayName = \\\"#{dst}\\\""
           ]
 
-          env[:ui].info(I18n.t("vagrant_esxi.creating"))
-          raise Errors::VmImageExistsError, :message => "#{dst} exists!" if system("ssh #{config.user}@#{config.host} test -e #{dst_dir}")
-
           # Strip VMX config
-          patterns = " -e '^uuid.location' -e '^uuid.bios' -e '^vc.uuid' -e '^displayName'"
+          patterns = ""
 
           # Change memSize
           unless config.memory_mb.nil? || config.memory_mb == ''
@@ -79,43 +65,34 @@ module VagrantPlugins
             echo << "#{key} = \\\"#{value}\\\""
           end
           
-          grep = "grep -v #{patterns} #{dst_dir}/#{src}.vmx.bak '>' #{dst_dir}/#{src}.vmx"
-          
-          cmd = [
-                 "mkdir -p '#{dst_dir}'",
-                 "find '#{src_dir}' -type f \\! -name \\*.iso -exec cp '\\{\\}' #{dst_dir}/ '\\;'",
-                 "cd '#{dst_dir}'",
-                 "find '#{src_dir}' -type f -name \\*.iso -exec ln -s '\\{\\}' '\\;'",
-                 "mv #{dst_vmx} #{dst_vmx}.bak",
-                ]
-          
-          # Create final command
-          cmd << grep
-          echo.each { |item| cmd << "echo '#{item}' '>>' '#{dst_vmx}'" }
-          cmd << "rm #{dst_vmx}.bak"
-          cmd << "chmod +x #{dst_vmx}"
+          # if we mofy the vmx
+          if ! patterns.empty? 
+            
+            # Create final command to patch the vmx file
+            cmd = [
+              "mv #{dst_vmx} #{dst_vmx_bak}",
+              "grep -v #{patterns} #{dst_vmx_bak} '>' #{dst_vmx}"
+            ]
+   
+            echo.each { |item| cmd << "echo '#{item}' '>>' '#{dst_vmx}'" }
+            cmd << "rm #{dst_vmx_bak}"
+            cmd << "chmod +x #{dst_vmx}"
 
-          #cmd.each { |value| puts "#{value}" }
-
-          cmd.each do |line|
-            #puts "exec:#{line}\n"
-            system("ssh #{config.user}@#{config.host} #{line}")
+            cmd.each do |line|
+              system("ssh #{config.user}@#{config.host} #{line}")
+            end
           end
 
-          #system("ssh #{config.user}@#{config.host} " + cmd.join(" '&&' "))
-
           env[:ui].info(I18n.t("vagrant_esxi.registering"))
-          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd solo/registervm '#{dst_vmx}'")
+          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/reload '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
 
-          env[:machine].id = "#{config.host}:#{o.chomp}"
-
-          #puts "VMId:#{env[:machine].id}"
-
+          env[:machine].id = "[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx"
+          
           # Add second drive
           unless config.add_hd.nil? || config.add_hd == ''
             env[:ui].info(I18n.t("vagrant_esxi.add_drive"))
 
-            cmd = "vim-cmd vmsvc/device.diskadd '[#{config.datastore}]\\ #{config.name}/#{env[:machine].config.vm.box}.vmx' '#{config.add_hd}M' 0 1 #{config.datastore}"
+            cmd = "vim-cmd vmsvc/device.diskadd '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' '#{config.add_hd}M' 0 1 #{config.datastore}"
 
             system("ssh #{config.user}@#{config.host} #{cmd}")
           end

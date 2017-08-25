@@ -10,7 +10,7 @@ module VagrantPlugins
 
           config = env[:machine].provider_config
 
-          env[:result] = system("ssh #{config.user}@#{config.host} vim-cmd vmsvc/getallvms | grep '\\[#{config.datastore}\\] #{config.name}/#{env[:machine].config.vm.box}.vmx' > /dev/null")
+          env[:result] = system("ssh #{config.user}@#{config.host} vim-cmd vmsvc/getallvms | grep '\\[#{config.datastore}\\] #{config.name}/#{config.name}.vmx' > /dev/null")
 
           @app.call env
         end

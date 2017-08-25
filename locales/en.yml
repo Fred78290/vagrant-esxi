@@ -12,6 +12,8 @@ en:
       Waiting for SSH...
     copying: |-
       Copying base box...
+    importing: |-
+      Importing VM...
     creating: |-
       Creating VM...
     registering: |-
@@ -28,6 +30,9 @@ en:
       Rsyncing directory: %{hostpath} => %{guestpath}
 
     errors:
+      ovf_error: |-
+        Could not import "%{ovf_file}" with ovftool.
+        Error: %{stderr}
       vm_image_exists: |-
         the vm image is already created. Please run 'vagrant destroy' first.
       rsync_error: |-

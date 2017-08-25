@@ -21,7 +21,7 @@ module VagrantPlugins
 
           config = machine.provider_config
 
-          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/get.guest '[#{config.datastore}]\\ #{config.name}/#{machine.config.vm.box}.vmx'")
+          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/get.guest '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
           m = /^   ipAddress = "(.*?)"/m.match(o)
           return nil if m.nil?
 

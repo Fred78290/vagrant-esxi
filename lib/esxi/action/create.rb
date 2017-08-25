@@ -13,6 +13,10 @@ module VagrantPlugins
         def call(env)
           config = env[:machine].provider_config
 
+          puts env[:machine].box.directory.join("afp-xenial-small.ova").to_s
+          
+          exit
+
           src = env[:machine].config.vm.box
           dst = config.name
 

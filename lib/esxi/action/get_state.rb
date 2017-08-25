@@ -22,7 +22,7 @@ module VagrantPlugins
 
           config = machine.provider_config
 
-          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/power.getstate '[#{config.datastore}]\\ #{config.name}/#{machine.config.vm.box}.vmx'")
+          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/power.getstate '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
 
           return :not_created if s.eql?(1)
 

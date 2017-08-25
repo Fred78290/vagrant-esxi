@@ -10,7 +10,6 @@ module VagrantPlugins
       attr_accessor :host
       attr_accessor :user
       attr_accessor :password
-      attr_accessor :template_name
       attr_accessor :name
       attr_accessor :datastore
       attr_accessor :add_hd
@@ -24,7 +23,6 @@ module VagrantPlugins
         errors << I18n.t("config.host") if host.nil?
         errors << I18n.t("config.user") if user.nil?
         errors << I18n.t("config.name") if name.nil?
-        errors << I18n.t("config.template_name") if name.nil?
         errors << I18n.t("config.datastore") if datastore.nil?
 
         { "esxi Provider" => errors }

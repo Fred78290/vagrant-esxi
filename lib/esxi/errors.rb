@@ -7,6 +7,10 @@ module VagrantPlugins
         error_namespace("vagrant_esxi.errors")
       end
 
+      class OvfError < VagrantESXiError
+        error_key(:ovf_error)
+      end
+
       class RsyncError < VagrantESXiError
         error_key(:rsync_error)
       end

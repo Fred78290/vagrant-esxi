@@ -1,18 +1,6 @@
-**This repository will continue to be maintained.**
-
-# Expected new features (in progress)
-The goal is to add some features to the original project, allowing in first priority
-1. abality to specify the number of cpus and memory usage
-2. abality to add VMX properties (like VMWare Studio plugin)
-3. abality to add a second drive (like vSphere plugin)
-
 # Vagrant ESXi Provider
 
-This is a Vagrant plugin for VMware ESXi. Virtual vagrant machines are cloned 
-from an other virtual machine located on your ESXi host. Boxes are not used 
-yet, the box name specifies the name of your template virtual machine.
-Just create a vagrant compatible virtual machine on the ESXi host 
-(see below) and use it as template.
+This is a Vagrant plugin for VMware ESXi.
 
 **NOTE:** This is a work in progress, it's forked from
 [vagrant-esxi](https://github.com/swobspace) and originally derived from
@@ -39,10 +27,12 @@ Otherwise your datacenter configuration may break.
 
 ## Create a Template VM
 
-vagrant-esxi uses an existing virtual machine as template for creating 
-further virtual machines.  Just create a virtual machine as usual 
-(i.e. with the vSphere client) and make it vagrant compatible. 
-For example we create a virtual machine running debian wheezy with the name "wheezy".
+This vagrant-esxi uses vagrant box or vagrant box_url to create virtual machines.
+You need to install ovftool on your host to allow import vagrant box to your esxi.
+
+You need also create a vagrant box for esxi provider
+(i.e. with the vSphere client or VMWare Fusion/Workstation) and make it vagrant compatible. 
+For example we create a virtual machine running ubuntu xenial with the name "xenial64".
 
 1. Install at least ssh, sudo, rsync
 2. Install vmware-tools provided by your esxi installation. 
@@ -61,25 +51,23 @@ For additional information see [Vagrant: create a base box](http://docs.vagrantu
 
 ## Example Vagrantfile
 
-`config.vm.box` contains the template name. The corresponding template 
-configuration file must exist in your datastore under 
-`/vmfs/volumes/<datastore>/<template name>/<template name>.vmx` 
-(i.e. `/vmfs/volumes/datastore1/wheezy/wheezy.vmx`).
+    Your box must contains an OVF or OVA file
 
     Vagrant.configure("2") do |config|
-      config.vm.box = "wheezy"
-      config.vm.box_url = "http://files.vagrantup.com/just_an_unused_dummy_yet.box"
-      config.vm.hostname = "mywheezy"
+      config.vm.box = "xenial64"
+      config.vm.box_url = "http://somewhere.com/xenial64_as_ovf.box"
+      config.vm.hostname = "myhost"
 
       config.vm.provider :esxi do |esxi|
-        esxi.name = "mywheezy"
+        esxi.name = "XENIAL_VM"
         esxi.host = "host"
         esxi.datastore = "datastore1"
         esxi.user = "root"
+        esxi.password = "password"
         esxi.add_hd = 1024
         esxi.memory_mb = 8192
         esxi.cpu_count = 4
-        esxi.vmx[""] = 
+        esxi.vmx["sata0.present"] = "FALSE"
       end
     end
 

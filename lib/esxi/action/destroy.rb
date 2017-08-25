@@ -21,7 +21,7 @@ module VagrantPlugins
           config = env[:machine].provider_config
 
           env[:ui].info I18n.t("vagrant_esxi.unregistering")
-          system("ssh #{config.user}@#{config.host} vim-cmd vmsvc/unregister '[#{config.datastore}]\\ #{config.name}/#{env[:machine].config.vm.box}.vmx'")
+          system("ssh #{config.user}@#{config.host} vim-cmd vmsvc/unregister '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
 
           env[:ui].info I18n.t("vagrant_esxi.removing")
           system("ssh #{config.user}@#{config.host} rm -rf /vmfs/volumes/#{config.datastore}/#{config.name}")

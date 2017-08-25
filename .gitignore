@@ -1,3 +1,5 @@
 *.gem
 README.html
 .vagrant
+ssh_key
+vagrantfile
