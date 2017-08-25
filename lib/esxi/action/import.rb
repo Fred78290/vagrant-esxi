@@ -92,7 +92,9 @@ module VagrantPlugins
           unless config.add_hd.nil? || config.add_hd == ''
             env[:ui].info(I18n.t("vagrant_esxi.add_drive"))
 
-            cmd = "vim-cmd vmsvc/device.diskadd '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' '#{config.add_hd}M' 0 1 #{config.datastore}"
+            dsk_size = config.add_hd * 1024
+
+            cmd = "vim-cmd vmsvc/device.diskadd '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' #{dsk_size} 0 1 #{config.datastore}"
 
             system("ssh #{config.user}@#{config.host} #{cmd}")
           end
