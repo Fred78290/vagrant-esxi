@@ -2,6 +2,15 @@
 
 This is a Vagrant plugin for VMware ESXi.
 
+## Goal
+It's to continue the stop development of the original plugin and add new features
+
+  This version support new features such as num of cpus, memory size, vmx properties, vagrant box instead use VM cloning.
+
+## Prerequistes
+
+  You must install ovftool on your computer running vagrant.
+
 **NOTE:** This is a work in progress, it's forked from
 [vagrant-esxi](https://github.com/swobspace) and originally derived from
 [vagrant-vsphere](https://github.com/nsidc/vagrant-vsphere) 
