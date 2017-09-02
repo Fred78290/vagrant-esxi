@@ -32,7 +32,7 @@ module VagrantPlugins
             end
           end
 
-          ovf_cmd = ["ovftool", "--datastore=#{config.datastore}", "--name=#{config.name}", "#{ovf_file}", "vi://#{config.user}:#{config.password}@#{config.host}"]
+          ovf_cmd = ["ovftool", "--noSSLVerify", "--acceptAllEulas", "--datastore=#{config.datastore}", "--network=#{config.network_private}", "--name=#{config.name}", "#{ovf_file}", "vi://#{config.user}:#{config.password}@#{config.host}"]
 
           r = Vagrant::Util::Subprocess.execute(*ovf_cmd)
           
@@ -88,6 +88,19 @@ module VagrantPlugins
 
           env[:machine].id = "[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx"
           
+          # Add more nic
+          env[:machine].config.vm.networks.each do |network_type, options|
+            puts network_type
+            next if type != :private_network && type != :public_network
+            
+            env[:ui].info(I18n.t("vagrant_esxi.add_nic"))
+            cmd = "vim-cmd vmsvc/devices.createnic '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' #{config.network_type} \\\'#{config.network_public}\\\'"
+
+            puts cmd
+              
+            system("ssh #{config.user}@#{config.host} #{cmd}")
+          end
+
           # Add second drive
           unless config.add_hd.nil? || config.add_hd == ''
             env[:ui].info(I18n.t("vagrant_esxi.add_drive"))

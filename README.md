@@ -7,6 +7,11 @@ It's to continue the stop development of the original plugin and add new feature
 
   This version support new features such as num of cpus, memory size, vmx properties, vagrant box instead use VM cloning.
 
+## Work in progress
+
+  Add second NIC for public network
+  Set IP address to NIC
+  
 ## Prerequistes
 
   You must install ovftool on your computer running vagrant.
