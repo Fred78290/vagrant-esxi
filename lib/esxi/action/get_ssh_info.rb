@@ -6,6 +6,7 @@ module VagrantPlugins
       class GetSshInfo
 
         def initialize(app, env)
+          @logger = Log4r::Logger.new("vagrant::plugins::esxi::ssh_info")
           @app = app
         end
 
@@ -21,14 +22,25 @@ module VagrantPlugins
 
           config = machine.provider_config
 
+          # In case of multi net, the cards are in reverse order
           o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/get.guest '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
-          m = /^   ipAddress = "(.*?)"/m.match(o)
-          return nil if m.nil?
+          
+          #@logger.debug(o)
 
-          return {
-              :host => m[1],
+          ipAddresses = o.scan(/^                  ipAddress = "(.*?)",/)
+
+          if ! ipAddresses.empty?
+            @logger.debug("ipAddresses: #{ipAddresses}")
+
+            return {
+              :host => ipAddresses[ipAddresses.length - 1][0],
               :port => 22
-          }
+            }
+          else
+            @logger.debug("Doesnt found network card")
+
+            return nil
+          end
         end
       end
     end

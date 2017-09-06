@@ -131,6 +131,8 @@ module VagrantPlugins
               b2.use PowerOn
             end
           end
+          
+          b.use Network
           b.use Provision          
           b.use SyncedFolders          
         end
@@ -186,6 +188,7 @@ module VagrantPlugins
       autoload :MessageNotRunning, action_root.join("message_not_running")
       autoload :PowerOff, action_root.join("power_off")
       autoload :PowerOn, action_root.join("power_on")
+      autoload :Network, action_root.join("network")
     end
   end
 end

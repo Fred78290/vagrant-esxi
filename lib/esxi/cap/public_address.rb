@@ -7,6 +7,9 @@ module VagrantPlugins
   
             ssh_info = machine.ssh_info
             return nil if !ssh_info
+
+            puts "SSH Infos:#{ssh_info}"
+            
             ssh_info[:host]
           end
         end

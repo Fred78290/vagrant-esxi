@@ -7,6 +7,7 @@ module VagrantPlugins
       class Import
 
         def initialize(app, env)
+          @logger = Log4r::Logger.new("vagrant::plugins::esxi::action::import")
           @app = app
         end
 
@@ -32,7 +33,7 @@ module VagrantPlugins
             end
           end
 
-          ovf_cmd = ["ovftool", "--noSSLVerify", "--acceptAllEulas", "--datastore=#{config.datastore}", "--network=#{config.network_private}", "--name=#{config.name}", "#{ovf_file}", "vi://#{config.user}:#{config.password}@#{config.host}"]
+          ovf_cmd = ["ovftool", "--noSSLVerify", "--acceptAllEulas", "--datastore=#{config.datastore}", "--network=#{config.network}", "--name=#{config.name}", "#{ovf_file}", "vi://#{config.user}:#{config.password}@#{config.host}"]
 
           r = Vagrant::Util::Subprocess.execute(*ovf_cmd)
           
@@ -89,18 +90,53 @@ module VagrantPlugins
           env[:machine].id = "[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx"
           
           # Add more nic
-          env[:machine].config.vm.networks.each do |network_type, options|
-            puts network_type
-            next if type != :private_network && type != :public_network
-            
-            env[:ui].info(I18n.t("vagrant_esxi.add_nic"))
-            cmd = "vim-cmd vmsvc/devices.createnic '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' #{config.network_type} \\\'#{config.network_public}\\\'"
+          numEthernetCards = get_num_ethernet_cards(config)
+          numOfNetworks = 0;
 
-            puts cmd
+          network_types = []
+          nic_types = []
+          current = 0
+
+          env[:machine].config.vm.networks.each do |network_type, options|
+            @logger.debug("network_type: #{network_type}, options:#{options}")
+            #next if network_type != :private_network && network_type != :public_network
+            next if network_type != :public_network
+            
+            if (network_type === :private_network)
+              network_types << config.network
+            else
+              if options[:network].nil?
+                network_types << config.config.network_public[current]
+                current += 1
+              else
+                network_types << options[:network]
+              end
+            end
+
+            if (options[:nic_type].nil?)
+              nic_types << "e1000"
+            else
+              nic_types << options[:nic_type]
+            end
+            
+            numOfNetworks += 1
+          end
+
+          needCard = numOfNetworks - numEthernetCards + 1;
+
+          @logger.info("Found #{numEthernetCards} ethernet card, need #{numOfNetworks} network, need #{needCard} more card")
+
+          (1..needCard).each do |i|            
+            env[:ui].info(I18n.t("vagrant_esxi.add_nic"))
+
+            network_type = network_types[i - 1]
+            nic_type = nic_types[i -1]
+
+            cmd = "vim-cmd vmsvc/devices.createnic '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' #{nic_type} \\\'#{network_type}\\\'"
               
             system("ssh #{config.user}@#{config.host} #{cmd}")
           end
-
+          
           # Add second drive
           unless config.add_hd.nil? || config.add_hd == ''
             env[:ui].info(I18n.t("vagrant_esxi.add_drive"))
@@ -114,7 +150,18 @@ module VagrantPlugins
             
           @app.call env
         end
+
+        def get_num_ethernet_cards(config)
+          # Make a first pass to assign interface numbers by adapter location
+          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/get.summary '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
+          
+          m = /numEthernetCards = ([0123456789]+),/m.match(o)
+
+          return 0 if m.nil?
+
+          return m[1].to_i
       end
     end
+  end
   end
 end

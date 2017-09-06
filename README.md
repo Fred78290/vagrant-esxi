@@ -9,8 +9,14 @@ It's to continue the stop development of the original plugin and add new feature
 
 ## Work in progress
 
-  Add second NIC for public network
-  Set IP address to NIC
+  Version 0.3.0
+    Use ovftool to import an ova/ovf instead cloning an existing VM
+    Add a second hardrive, drive size specified in Mb
+  
+  Version 0.3.1
+    Add second NIC for public network
+    Set IP address for private network (first NIC needed at boot)
+    Set IP address for public network (second NIC added by vagrant)
   
 ## Prerequistes
 
@@ -73,6 +79,7 @@ For additional information see [Vagrant: create a base box](http://docs.vagrantu
       config.vm.hostname = "myhost"
 
       config.vm.provider :esxi do |esxi|
+		esxi.network = "VM Network" # The name of the network to attach the created VM
         esxi.name = "XENIAL_VM"
         esxi.host = "host"
         esxi.datastore = "datastore1"
@@ -83,6 +90,10 @@ For additional information see [Vagrant: create a base box](http://docs.vagrantu
         esxi.cpu_count = 4
         esxi.vmx["sata0.present"] = "FALSE"
       end
+
+      config.vm.network "private_network", ip: "172.16.62.50", nic_type: "e1000", network: "VM Network"
+      #config.vm.network "public_network", bridge: "eth1", ip: "10.10.1.5", nic_type: "e1000", network: "VM Public"
+      config.vm.network "public_network", ip: "10.10.1.5", nic_type: "e1000", network: "VM Public"
     end
 
 ## Issues

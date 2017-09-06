@@ -5,7 +5,9 @@ module VagrantPlugins
     class Config < Vagrant.plugin("2", :config)
       def initialize
         @vmx = {}
-        @network_type = "e1000"
+        @network_adapters = {}
+        # We require that network adapter 1 is a NAT device.
+        #network_adapter(1, :private_network)
       end
       
       attr_accessor :host
@@ -17,9 +19,21 @@ module VagrantPlugins
       attr_accessor :memory_mb
       attr_accessor :cpu_count
       attr_accessor :vmx
-      attr_accessor :network_private
-      attr_accessor :network_public
-      attr_accessor :network_type
+      attr_accessor :network
+
+      # The defined network adapters.
+      #
+      # @return [Hash]
+      attr_reader :network_adapters
+
+      # This defines a network adapter that will be added to the VirtualBox
+      # virtual machine in the given slot.
+      #
+      # @param [Integer] slot The slot for this network adapter.
+      # @param [Symbol] type The type of adapter.
+      def network_adapter(slot, type, **opts)
+        @network_adapters[slot] = [type, opts]
+      end
 
       def validate(machine)
         errors = _detected_errors
@@ -28,7 +42,7 @@ module VagrantPlugins
         errors << I18n.t("config.user") if user.nil?
         errors << I18n.t("config.name") if name.nil?
         errors << I18n.t("config.datastore") if datastore.nil?
-        errors << I18n.t("config.network_private") if network_private.nil?
+        errors << I18n.t("config.network") if network.nil?
         
         { "esxi Provider" => errors }
       end
