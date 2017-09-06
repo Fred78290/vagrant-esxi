@@ -9,14 +9,16 @@ It's to continue the stop development of the original plugin and add new feature
 
 ## Work in progress
 
-  Version 0.3.0
-    Use ovftool to import an ova/ovf instead cloning an existing VM
-    Add a second hardrive, drive size specified in Mb
-  
-  Version 0.3.1
-    Add second NIC for public network
-    Set IP address for private network (first NIC needed at boot)
-    Set IP address for public network (second NIC added by vagrant)
+Version 0.3.0.
+
+	Use ovftool to import an ova/ovf instead cloning an existing VM
+	Add a second hardrive, drive size specified in Mb
+
+Version 0.3.1.
+
+	Add second NIC for public network
+	Set IP address for private network (first NIC needed at boot)
+	Set IP address for public network (second NIC added by vagrant)
   
 ## Prerequistes
 
