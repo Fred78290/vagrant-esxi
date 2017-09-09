@@ -1,5 +1,4 @@
 require "i18n"
-require "open3"
 
 module VagrantPlugins
   module ESXi
@@ -35,12 +34,12 @@ module VagrantPlugins
 
           ovf_cmd = ["ovftool", "--noSSLVerify", "--acceptAllEulas", "--datastore=#{config.datastore}", "--network=#{config.network}", "--name=#{config.name}", "#{ovf_file}", "vi://#{config.user}:#{config.password}@#{config.host}"]
 
-          r = Vagrant::Util::Subprocess.execute(*ovf_cmd)
+          result = Vagrant::Util::Subprocess.execute(*ovf_cmd)
           
-          if r.exit_code != 0
+          if result.exit_code != 0
             raise Errors::OvfError,
               :ovf_file => ovf_file,
-              :stderr => r.stderr
+              :stderr => result.stderr
           end            
         
           echo = [
@@ -52,18 +51,18 @@ module VagrantPlugins
           # Change memSize
           unless config.memory_mb.nil? || config.memory_mb == ''
             patterns += " -e '^memSize'"
-            echo << "memSize = \\\"#{config.memory_mb}\\\""
+            echo << "memSize = \"#{config.memory_mb}\""
           end
 
           # Change numvcpus
           unless config.cpu_count.nil? || config.cpu_count == ''
             patterns += " -e '^numvcpus'"
-            echo << "numvcpus = \\\"#{config.cpu_count}\\\""
+            echo << "numvcpus = \"#{config.cpu_count}\""
           end
 
           config.vmx.each do |key, value|
             patterns += " -e '^#{key}'"
-            echo << "#{key} = \\\"#{value}\\\""
+            echo << "#{key} = \"#{value}\""
           end
           
           # if we mofy the vmx
@@ -72,20 +71,29 @@ module VagrantPlugins
             # Create final command to patch the vmx file
             cmd = [
               "mv #{dst_vmx} #{dst_vmx_bak}",
-              "grep -v #{patterns} #{dst_vmx_bak} '>' #{dst_vmx}"
+              "grep -v #{patterns} #{dst_vmx_bak} > '#{dst_vmx}'"
             ]
    
-            echo.each { |item| cmd << "echo '#{item}' '>>' '#{dst_vmx}'" }
+            echo.each { |item| cmd << "echo '#{item}' >> '#{dst_vmx}'" }
             cmd << "rm #{dst_vmx_bak}"
             cmd << "chmod +x #{dst_vmx}"
 
             cmd.each do |line|
-              system("ssh #{config.user}@#{config.host} #{line}")
+              result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "#{line}")
+
+              if result.exit_code != 0
+                raise Errors::VmRegisteringError, stderr: result.stderr
+              end
             end
           end
 
           env[:ui].info(I18n.t("vagrant_esxi.registering"))
-          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/reload '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
+
+          result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "vim-cmd vmsvc/reload '[#{config.datastore}] #{config.name}/#{config.name}.vmx'")
+
+          if result.exit_code != 0
+            raise Errors::VmRegisteringError, stderr: result.stderr
+          end
 
           env[:machine].id = "[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx"
           
@@ -132,9 +140,13 @@ module VagrantPlugins
             network_type = network_types[i - 1]
             nic_type = nic_types[i -1]
 
-            cmd = "vim-cmd vmsvc/devices.createnic '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' #{nic_type} \\\'#{network_type}\\\'"
-              
-            system("ssh #{config.user}@#{config.host} #{cmd}")
+            cmd = "vim-cmd vmsvc/devices.createnic '[#{config.datastore}] #{config.name}/#{config.name}.vmx' #{nic_type} '#{network_type}'"
+          
+            result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "#{cmd}")
+            
+            if result.exit_code != 0
+              raise Errors::VMNicCreateError, network: network_type, stderr: result.stderr
+            end
           end
           
           # Add second drive
@@ -143,9 +155,13 @@ module VagrantPlugins
 
             dsk_size = config.add_hd * 1024
 
-            cmd = "vim-cmd vmsvc/device.diskadd '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx' #{dsk_size} 0 1 #{config.datastore}"
+            cmd = "vim-cmd vmsvc/device.diskadd '[#{config.datastore}] #{config.name}/#{config.name}.vmx' #{dsk_size} 0 1 #{config.datastore}"
 
-            system("ssh #{config.user}@#{config.host} #{cmd}")
+            result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "#{cmd}")
+ 
+            if result.exit_code != 0
+                raise Errors::VMHdCreateError, stderr: result.stderr
+            end
           end
             
           @app.call env
@@ -153,9 +169,13 @@ module VagrantPlugins
 
         def get_num_ethernet_cards(config)
           # Make a first pass to assign interface numbers by adapter location
-          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/get.summary '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
+          result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "vim-cmd vmsvc/get.summary '[#{config.datastore}] #{config.name}/#{config.name}.vmx'")
           
-          m = /numEthernetCards = ([0123456789]+),/m.match(o)
+          if result.exit_code != 0
+            raise Errors::VmRegisteringError, stderr: result.stderr
+          end
+
+          m = /numEthernetCards = ([0123456789]+),/m.match(result.stdout)
 
           return 0 if m.nil?
 

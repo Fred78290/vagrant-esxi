@@ -1,4 +1,3 @@
-require "open3"
 
 module VagrantPlugins
   module ESXi
@@ -23,17 +22,18 @@ module VagrantPlugins
           config = machine.provider_config
 
           # In case of multi net, the cards are in reverse order
-          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/get.guest '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
+          result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "vim-cmd vmsvc/get.guest '[#{config.datastore}] #{config.name}/#{config.name}.vmx'")
           
-          #@logger.debug(o)
-
-          ipAddresses = o.scan(/^                  ipAddress = "(.*?)",/)
+          # Try to drop IPV6 addresses
+          ipAddresses = result.stdout.scan(/^                  ipAddress = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})",/)
 
           if ! ipAddresses.empty?
             @logger.debug("ipAddresses: #{ipAddresses}")
 
+            ipAddresse = ipAddresses[ipAddresses.length - 1][0]
+
             return {
-              :host => ipAddresses[ipAddresses.length - 1][0],
+              :host => ipAddresse,
               :port => 22
             }
           else

@@ -1,4 +1,3 @@
-require "open3"
 
 module VagrantPlugins
   module ESXi
@@ -22,11 +21,13 @@ module VagrantPlugins
 
           config = machine.provider_config
 
-          o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/power.getstate '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
+          result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "vim-cmd vmsvc/power.getstate '[#{config.datastore}] #{config.name}/#{config.name}.vmx'")
 
-          return :not_created if s.eql?(1)
+          if result.exit_code != 0
+            return :not_created
+          end
 
-          if o.match(/Powered on/)
+          if result.stdout.match(/Powered on/)
             :running
           else
             :poweroff

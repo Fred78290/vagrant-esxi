@@ -19,6 +19,10 @@ Version 0.3.1.
 	Add second NIC for public network
 	Set IP address for private network (first NIC needed at boot)
 	Set IP address for public network (second NIC added by vagrant)
+
+Version 0.3.2
+
+  Replace Open3.capture2 call by Vagrant::Util::Subprocess.execute
   
 ## Prerequistes
 

@@ -35,6 +35,15 @@ en:
       ovf_error: |-
         Could not import "%{ovf_file}" with ovftool.
         Error: %{stderr}
+      nic_error: |-
+        Could not create NIC with network "%{network}".
+        Error: %{stderr}
+      add_drive_error: |-
+        Could not create NIC with network "%{network}".
+        Error: %{stderr}
+      vm_registering_error: |-
+        Could not register the VM".
+        Error: %{stderr}
       vm_image_exists: |-
         the vm image is already created. Please run 'vagrant destroy' first.
       rsync_error: |-

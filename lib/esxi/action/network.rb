@@ -265,11 +265,13 @@ module VagrantPlugins
                     config = @env[:machine].provider_config
 
 					# Make a first pass to assign interface numbers by adapter location
-                    o, s = Open3.capture2("ssh #{config.user}@#{config.host} vim-cmd vmsvc/get.summary '[#{config.datastore}]\\ #{config.name}/#{config.name}.vmx'")
+                    result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "vim-cmd vmsvc/get.summary '[#{config.datastore}] #{config.name}/#{config.name}.vmx'")
                     
-                    #@logger.info("Guest info: #{o}")
-                    
-                    m = /numEthernetCards = ([0123456789]+),/m.match(o)
+                    if result.exit_code != 0
+                        raise Errors::VmRegisteringError, stderr: result.stderr
+                    end
+
+                    m = /numEthernetCards = ([0123456789]+),/m.match(result.stdout)
 
                     return 0 if m.nil?
 

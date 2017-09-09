@@ -15,10 +15,20 @@ module VagrantPlugins
         error_key(:rsync_error)
       end
 
+      class VmRegisteringError < VagrantESXiError
+        error_key(:vm_registering_error)
+      end
+
       class VmImageExistsError < VagrantESXiError
         error_key(:vm_image_exists)
       end
 
+      class VMNicCreateError < VagrantESXiError
+        error_key(:nic_error)
+      end
+      class VMHdCreateError < VagrantESXiError
+        error_key(:nic_error)
+      end
     end
   end
 end
