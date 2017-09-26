@@ -3,3 +3,4 @@ README.html
 .vagrant
 ssh_key
 vagrantfile
+install.log

@@ -5,6 +5,7 @@ module VagrantPlugins
     class Config < Vagrant.plugin("2", :config)
       def initialize
         @vmx = {}
+        @nic_inversed = true
         @network_adapters = {}
         # We require that network adapter 1 is a NAT device.
         #network_adapter(1, :private_network)
@@ -20,7 +21,8 @@ module VagrantPlugins
       attr_accessor :cpu_count
       attr_accessor :vmx
       attr_accessor :network
-
+      attr_accessor :nic_inversed
+      
       # The defined network adapters.
       #
       # @return [Hash]

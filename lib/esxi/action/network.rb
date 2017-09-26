@@ -314,20 +314,26 @@ module VagrantPlugins
                     interface = 1
 
                     networks.each do |network|
-                        adapter_id = network[:adapter].to_i
-                        @logger.debug("adapter_id: #{adapter_id}")
+                        auto_config = network[:auto_config];
 
-                        adapter = find_adapter_id(adapters, adapter_id)
-                        @logger.debug("adapter: #{adapter}")
-                        
-                        adapter_type = adapter[:type]
-                        @logger.debug("adapter_type: #{adapter_type}")
+                        if auto_config.nil? || auto_config
+                            adapter_id = network[:adapter].to_i
+                            @logger.debug("adapter_id: #{adapter_id}")
 
-                        if adapter_type === :hostonly
-                            network[:interface] = 0
-                        else
-                            network[:interface] = interface
-                            interface += 1
+                            adapter = find_adapter_id(adapters, adapter_id)
+                            @logger.debug("adapter: #{adapter}")
+                            
+                            if ! adapter.nil?
+                                adapter_type = adapter[:type]
+                                @logger.debug("adapter_type: #{adapter_type}")
+
+                                if adapter_type === :hostonly
+                                    network[:interface] = 0
+                                else
+                                    network[:interface] = interface
+                                    interface += 1
+                                end
+                            end
                         end
                     end
 

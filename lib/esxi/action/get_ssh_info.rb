@@ -30,7 +30,12 @@ module VagrantPlugins
           if ! ipAddresses.empty?
             @logger.debug("ipAddresses: #{ipAddresses}")
 
-            ipAddresse = ipAddresses[ipAddresses.length - 1][0]
+            # Debian/ubuntu....
+            if config.nic_inversed
+              ipAddresse = ipAddresses[ipAddresses.length - 1][0]
+            else
+              ipAddresse = ipAddresses[0][0]
+            end
 
             return {
               :host => ipAddresse,
