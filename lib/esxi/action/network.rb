@@ -27,9 +27,7 @@ module VagrantPlugins
                 def call(env)
                     # TODO: Validate network configuration prior to anything below
                     @env = env
-                    
-                    puts "VagrantPlugins:ESXi:Action:Network"
-                    
+                                        
                     # Get the list of network adapters from the configuration
                     network_adapters_config = env[:machine].provider_config.network_adapters.dup
 
