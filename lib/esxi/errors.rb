@@ -27,7 +27,10 @@ module VagrantPlugins
         error_key(:nic_error)
       end
       class VMHdCreateError < VagrantESXiError
-        error_key(:nic_error)
+        error_key(:add_drive_error)
+      end
+      class VMHdExpandError < VagrantESXiError
+        error_key(:expand_drive_error)
       end
     end
   end

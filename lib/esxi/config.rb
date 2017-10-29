@@ -22,6 +22,7 @@ module VagrantPlugins
       attr_accessor :vmx
       attr_accessor :network
       attr_accessor :nic_inversed
+      attr_accessor :expand_hd
       
       # The defined network adapters.
       #

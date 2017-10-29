@@ -87,6 +87,22 @@ module VagrantPlugins
             end
           end
 
+          # Expand main drive
+          unless config.expand_hd.nil? || config.expand_hd == ''
+            env[:ui].info(I18n.t("vagrant_esxi.expand_drive"))
+
+            #cmd = "vmkfstools -X #{dsk_size} '[#{config.datastore}] #{config.name}/#{config.name}.vmdk'"
+            cmd = "vmkfstools '/vmfs/volumes/#{config.datastore}/#{config.name}/#{config.name}.vmdk' -X #{config.expand_hd}M"
+            
+            result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "#{cmd}")
+            
+            if result.exit_code != 0
+                raise Errors::VMHdExpandError, stderr: result.stderr
+            end
+          end
+
+          # Register VM
+          
           env[:ui].info(I18n.t("vagrant_esxi.registering"))
 
           result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "vim-cmd vmsvc/reload '[#{config.datastore}] #{config.name}/#{config.name}.vmx'")
@@ -148,7 +164,7 @@ module VagrantPlugins
               raise Errors::VMNicCreateError, network: network_type, stderr: result.stderr
             end
           end
-          
+ 
           # Add second drive
           unless config.add_hd.nil? || config.add_hd == ''
             env[:ui].info(I18n.t("vagrant_esxi.add_drive"))

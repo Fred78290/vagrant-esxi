@@ -18,6 +18,8 @@ en:
       Creating VM...
     registering: |-
       Registering VM...
+    expand_drive: |-
+      Expand the main drive...
     add_drive: |-
       Creating second drive...
     add_nic: |-
@@ -39,7 +41,10 @@ en:
         Could not create NIC with network "%{network}".
         Error: %{stderr}
       add_drive_error: |-
-        Could not create NIC with network "%{network}".
+        Could not create second drive.
+        Error: %{stderr}
+      expand_drive_error: |-
+        Could not expand main drive.
         Error: %{stderr}
       vm_registering_error: |-
         Could not register the VM".
