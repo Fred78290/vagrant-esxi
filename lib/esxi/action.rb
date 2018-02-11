@@ -133,6 +133,7 @@ module VagrantPlugins
           end
           
           b.use Network
+          b.use SetHostname
           b.use Provision          
           b.use SyncedFolders          
         end
