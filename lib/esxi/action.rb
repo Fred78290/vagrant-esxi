@@ -35,6 +35,7 @@ module VagrantPlugins
                 next       
               end
               
+              b.use SetHostname
               b3.use Provision
               b3.use SyncedFolders 
             end        
