@@ -29,8 +29,8 @@ module VagrantPlugins
               next
             end
             
-            b2.use Call, IsRunning do |env, b3|
-              if !env[:result]
+            b2.use Call, IsRunning do |env1, b3|
+              if !env1[:result]
                 b3.use MessageNotRunning
                 next       
               end
@@ -52,8 +52,8 @@ module VagrantPlugins
               next
             end
             
-            b2.use Call, IsRunning do |env, b3|
-              if !env[:result]
+            b2.use Call, IsRunning do |env1, b3|
+              if !env1[:result]
                 b3.use MessageNotRunning
                 next
               end
@@ -73,8 +73,8 @@ module VagrantPlugins
               next
             end
             
-            b2.use Call, IsRunning do |env, b3|
-              if !env[:result]
+            b2.use Call, IsRunning do |env1, b3|
+              if !env1[:result]
                 b3.use MessageNotRunning
                 next
               end
@@ -94,8 +94,8 @@ module VagrantPlugins
               next
             end
             
-            b2.use Call, IsRunning do |env, b3|
-              if !env[:result]
+            b2.use Call, IsRunning do |env1, b3|
+              if !env1[:result]
                 b3.use MessageNotRunning
                 next
               end

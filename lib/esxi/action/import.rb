@@ -5,7 +5,7 @@ module VagrantPlugins
     module Action
       class Import
 
-        def initialize(app, env)
+        def initialize(app, _env)
           @logger = Log4r::Logger.new("vagrant::plugins::esxi::action::import")
           @app = app
         end
@@ -18,30 +18,50 @@ module VagrantPlugins
           dst_vmx = "#{dst_dir}/#{dst}.vmx"
           dst_vmx_bak = "#{dst_dir}/#{dst}.vmx.bak"
           
-          env[:ui].info(I18n.t("vagrant_esxi.importing"))
-
-          if system("ssh #{config.user}@#{config.host} test -e #{dst_dir}")
+          if config.is_vm_exists(dst)
             raise Errors::VmImageExistsError, :message => "#{dst} exists!"
           end
-          
-          # Find first OVF/OVA file
-          env[:machine].box.directory.each_child(false) do |child|
-            if child.extname === ".ovf" || child.extname === ".ova" || child.extname === ".vmx"
-                ovf_file = env[:machine].box.directory.join(child.to_s).to_s
-                break
+
+          # If we don't use an already existing VM
+          if config.use_template then
+            clone_vm(env, config.template_name, config.name, true)
+          else
+            env[:ui].info(I18n.t("vagrant_esxi.importing"))
+            
+            # Find first OVF/OVA file
+            env[:machine].box.directory.each_child(false) do |child|
+              if child.extname === ".ovf" || child.extname === ".ova" || child.extname === ".vmx"
+                  ovf_file = env[:machine].box.directory.join(child.to_s).to_s
+                  break
+              end
+            end
+
+            ovf_cmd = [
+              "ovftool",
+              "--noSSLVerify",
+              "--acceptAllEulas",
+              "--diskMode=thin",
+              "--datastore=#{config.datastore}",
+              "--network=#{config.network}",
+              "--name=#{config.name}",
+              "#{ovf_file}",
+              "vi://#{config.user}:#{config.password}@#{config.host}"
+            ]
+
+            result = Vagrant::Util::Subprocess.execute(*ovf_cmd)
+            
+            if result.exit_code != 0
+              raise Errors::OvfError,
+                :ovf_file => ovf_file,
+                :stderr => result.stderr
+            end
+            
+            # If we must create a template from import OVA
+            if config.create_template && config.template_name.nil? == false then
+              clone_vm(env, config.name, config.template_name, true)
             end
           end
 
-          ovf_cmd = ["ovftool", "--noSSLVerify", "--acceptAllEulas", "--datastore=#{config.datastore}", "--network=#{config.network}", "--name=#{config.name}", "#{ovf_file}", "vi://#{config.user}:#{config.password}@#{config.host}"]
-
-          result = Vagrant::Util::Subprocess.execute(*ovf_cmd)
-          
-          if result.exit_code != 0
-            raise Errors::OvfError,
-              :ovf_file => ovf_file,
-              :stderr => result.stderr
-          end            
-        
           echo = [
           ]
 
@@ -154,7 +174,7 @@ module VagrantPlugins
             env[:ui].info(I18n.t("vagrant_esxi.add_nic"))
 
             network_type = network_types[i - 1]
-            nic_type = nic_types[i -1]
+            nic_type = nic_types[i - 1]
 
             cmd = "vim-cmd vmsvc/devices.createnic '[#{config.datastore}] #{config.name}/#{config.name}.vmx' #{nic_type} '#{network_type}'"
           
@@ -167,9 +187,10 @@ module VagrantPlugins
  
           # Add second drive
           unless config.add_hd.nil? || config.add_hd == ''
-            env[:ui].info(I18n.t("vagrant_esxi.add_drive"))
-
             dsk_size = config.add_hd * 1024
+            msg = I18n.t("vagrant_esxi.add_drive")
+
+            env[:ui].info("#{msg} #{dsk_size}")
 
             cmd = "vim-cmd vmsvc/device.diskadd '[#{config.datastore}] #{config.name}/#{config.name}.vmx' #{dsk_size} 0 1 #{config.datastore}"
 
@@ -181,6 +202,36 @@ module VagrantPlugins
           end
             
           @app.call env
+        end
+
+        def clone_vm(env, source_vm, dest_vm, register)
+          _msg = I18n.t("vagrant_esxi.cloning")
+          config = env[:machine].provider_config
+          env[:ui].info("#{_msg} #{source_vm} --> #{dest_vm}")
+
+          cmd = [
+            "mkdir -p /vmfs/volumes/#{config.datastore}/#{dest_vm}",
+            "'cd /vmfs/volumes/#{config.datastore}/#{source_vm}'",
+            "'find . -type f \\! -name \\*.iso \\! -name \\*.vmdk -exec cp \\{\\} /vmfs/volumes/#{config.datastore}/#{dest_vm}/ \\;'",
+            "'find . -type f -name \\*.vmdk -print -exec vmkfstools -i \\{\\} /vmfs/volumes/#{config.datastore}/#{dest_vm}/\\{\\} -d thin \\;'",
+            "'cd /vmfs/volumes/#{config.datastore}/#{dest_vm}'",
+            "'find /vmfs/volumes/#{config.datastore}/#{source_vm} -type f -name \\*.iso -exec ln -s \\{\\} \\;'",
+            "mv /vmfs/volumes/#{config.datastore}/#{dest_vm}/#{source_vm}.vmx /vmfs/volumes/#{config.datastore}/#{dest_vm}/#{dest_vm}.vmx.bak",
+            "grep -v -e '^uuid.location' -e '^uuid.bios' -e '^vc.uuid' -e '^displayName' /vmfs/volumes/#{config.datastore}/#{dest_vm}/#{dest_vm}.vmx.bak '>' /vmfs/volumes/#{config.datastore}/#{dest_vm}/#{dest_vm}.vmx",
+            "echo 'displayName = #{dest_vm}' '>>' /vmfs/volumes/#{config.datastore}/#{dest_vm}/#{dest_vm}.vmx",
+            "rm /vmfs/volumes/#{config.datastore}/#{dest_vm}/#{dest_vm}.vmx.bak",
+            "chmod +x /vmfs/volumes/#{config.datastore}/#{dest_vm}/#{dest_vm}.vmx",
+          ]
+
+          system("ssh #{config.user}@#{config.host} " + cmd.join(" '&&' "))
+
+          if register then
+            result = Vagrant::Util::Subprocess.execute("ssh", "#{config.user}@#{config.host}", "vim-cmd solo/registervm '/vmfs/volumes/#{config.datastore}/#{dest_vm}/#{dest_vm}.vmx'")
+
+            if result.exit_code != 0
+              raise Errors::VmRegisteringError, stderr: result.stderr
+            end
+          end
         end
 
         def get_num_ethernet_cards(config)
@@ -196,8 +247,8 @@ module VagrantPlugins
           return 0 if m.nil?
 
           return m[1].to_i
+        end
       end
     end
-  end
   end
 end
