@@ -1,6 +1,22 @@
+# OS-specific
+.DS_Store
+
+# editors
+*.swp
+
+# Bundler/Rubygems
 *.gem
-README.html
+.bundle
+pkg/*
+tags
+Gemfile.lock
+
+# Vagrant
 .vagrant
-ssh_key
-vagrantfile
+Vagrantfile
 install.log
+ssh_key
+
+# RVM files for gemset/ruby setting
+.ruby-*
+.rvmrc

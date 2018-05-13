@@ -1,9 +1,9 @@
 require "pathname"
-require "esxi/plugin"
+require "vagrant-esxi/plugin"
 
 module VagrantPlugins
   module ESXi
-    lib_path = Pathname.new(File.expand_path("../esxi", __FILE__))
+    lib_path = Pathname.new(File.expand_path("../vagrant-esxi", __FILE__))
     autoload :Action, lib_path.join("action")
     autoload :Errors, lib_path.join("errors")
 
