@@ -34,7 +34,21 @@ en:
       VM not running.
     rsync_directory: |-
       Rsyncing directory: %{hostpath} => %{guestpath}
-
+    
+    config:
+      host: |-
+        ESXI host not defined
+      user: |-
+        ESXI user admin not defined
+      password: |-
+        ESXI password admin not defined
+      host: |-
+        ESXI host not defined
+      datastore: |-
+        ESXI datastore not defined
+      datastore: |-
+        ESXI default network not defined
+      
     errors:
       ovf_error: |-
         Could not import "%{ovf_file}" with ovftool.
