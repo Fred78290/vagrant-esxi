@@ -3,11 +3,20 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in vagrant-esxi.gemspec
 gemspec
 
+ENV['VAGRANT_VERSION'] = "v2.1.1"
+
 group :development do
-  gem "vagrant", git: "https://github.com/hashicorp/vagrant.git"
+  if ENV['VAGRANT_VERSION']
+    gem 'vagrant', :git => 'https://github.com/hashicorp/vagrant.git', tag: ENV['VAGRANT_VERSION']
+  else
+    gem 'vagrant', :git => 'https://github.com/hashicorp/vagrant.git'
+  end
+
+  gem 'vagrant-spec', :github => 'hashicorp/vagrant-spec'
+  gem 'pry'
 end
 
 group :plugins do
-  #gem "vagrant-esxi", path: "."
+  # gem "vagrant-esxi", path: "."
   gemspec
 end

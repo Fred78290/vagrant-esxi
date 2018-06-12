@@ -9,12 +9,14 @@
             "type": "Ruby",
             "request": "launch",
             "cwd": "${workspaceRoot}",
-            "program": "/opt/vagrant/bin/vagrant",
-            "args": ["up", "--provider=esxi"],
+            "program": "./bin/vagrant",
+            "args": [
+                "status"
+            ],
             "env": {
-                    "VAGRANT_CWD": "${workspaceRoot}"
-                }
-            },    
+                "VAGRANT_CWD": "${workspaceRoot}"
+            }
+        },
         {
             "name": "Debug Local File",
             "type": "Ruby",

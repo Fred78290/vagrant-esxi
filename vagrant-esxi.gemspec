@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.required_rubygems_version = ">= 1.3.6"
   # spec.rubyforge_project         = "vagrant-aws"
 
-  spec.add_development_dependency "bundler", "~> 1.14"
+  spec.add_development_dependency "bundler", "~> 1.16.1"
   #spec.add_runtime_dependency "fog", "~> 1.22"
   spec.add_runtime_dependency "iniparse", "~> 1.4", ">= 1.4.2"
 
