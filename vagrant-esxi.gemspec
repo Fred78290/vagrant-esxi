@@ -18,14 +18,14 @@ Gem::Specification.new do |spec|
   spec.required_rubygems_version = ">= 1.3.6"
   # spec.rubyforge_project         = "vagrant-aws"
 
-  spec.add_development_dependency "bundler", "~> 1.16.1"
+  spec.add_development_dependency "bundler", '~> 1.16', '>= 1.16.1'
   #spec.add_runtime_dependency "fog", "~> 1.22"
   spec.add_runtime_dependency "iniparse", "~> 1.4", ">= 1.4.2"
 
   spec.add_development_dependency "rake", "~> 10.0"
   # rspec 3.4 to mock File
   spec.add_development_dependency "rspec", "~> 3.4"
-  spec.add_development_dependency "rspec-its", "~> 1.2.0"
+  spec.add_development_dependency "rspec-its", '~> 1.2', '>= 1.2.0'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
