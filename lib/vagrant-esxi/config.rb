@@ -65,9 +65,9 @@ module VagrantPlugins
       end
 
       def is_vm_exists(vm_name)
-        dst_dir = "/vmfs/volumes/#{datastore}/#{vm_name}"
+        dst_dir = "/vmfs/volumes/#{datastore}/#{vm_name}/#{vm_name}.vmx"
 
-        return system("ssh #{user}@#{host} test -e #{dst_dir}")
+        return system("ssh #{user}@#{host} test -f #{dst_dir}")
       end
   
       # This defines a network adapter that will be added to the VirtualBox
