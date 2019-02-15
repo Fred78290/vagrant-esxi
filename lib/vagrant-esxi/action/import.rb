@@ -108,7 +108,7 @@ module VagrantPlugins
           end
 
           # Expand main drive
-          unless config.expand_hd.nil? || config.expand_hd == ''
+          unless config.expand_hd.nil? || config.expand_hd == 0
             env[:ui].info(I18n.t("vagrant_esxi.expand_drive"))
 
             #cmd = "vmkfstools -X #{dsk_size} '[#{config.datastore}] #{config.name}/#{config.name}.vmdk'"
@@ -186,7 +186,7 @@ module VagrantPlugins
           end
  
           # Add second drive
-          unless config.add_hd.nil? || config.add_hd == ''
+          unless config.add_hd.nil? || config.add_hd == 0
             dsk_size = config.add_hd * 1024
             msg = I18n.t("vagrant_esxi.add_drive")
 
